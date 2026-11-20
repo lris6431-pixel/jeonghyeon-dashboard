@@ -417,7 +417,7 @@
   .rest-badge{display:inline-flex;align-items:center;justify-content:center;min-width:0;
     background:linear-gradient(180deg,#FFF8DE,#FFE9A6);
     border:clamp(2px,.34vh,3px) solid #E0B637;border-radius:999px;color:#6E4E06;
-    font-weight:900;font-size:clamp(14px,2.75vh,31px);letter-spacing:-.03em;line-height:1.16;
+    font-weight:900;font-size:clamp(14px,3.05vh,35px);letter-spacing:-.03em;line-height:1.16;
     padding:clamp(3px,.62vh,9px) clamp(11px,1.7vw,28px);
     box-shadow:0 clamp(2px,.5vh,4px) 0 rgba(186,146,30,.26);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
@@ -430,9 +430,9 @@
     background:linear-gradient(180deg,#E7F8FF 0%,#F2FEF6 42%,#E9FBE4 76%,#DFF7D6 100%);
     box-shadow:0 clamp(4px,1vh,9px) 0 rgba(35,63,90,.18);
     display:grid;grid-template-rows:auto minmax(0,1fr);
-    padding:clamp(7px,1.15vh,16px) clamp(8px,1.3vw,20px) 0}
+    padding:clamp(7px,1.2vh,18px) clamp(8px,1.4vw,22px) 0}
   .hc-sun{position:absolute;left:clamp(10px,2.4vw,44px);top:clamp(8px,2vh,26px);
-    width:clamp(26px,5.6vh,60px);height:clamp(26px,5.6vh,60px);border-radius:50%;z-index:0;
+    width:clamp(26px,6vh,64px);height:clamp(26px,6vh,64px);border-radius:50%;z-index:0;
     background:radial-gradient(circle at 38% 34%,#FFF7C4,#FFDD63 62%,#F7C63C 100%);
     box-shadow:0 0 0 clamp(4px,1vh,10px) rgba(255,232,130,.34)}
   .hc-land{position:absolute;left:-1%;right:-1%;bottom:-1px;width:102%;
@@ -440,32 +440,29 @@
   .hc-land svg{width:100%;height:100%;display:block}
 
   .hc-copy{position:relative;z-index:2;text-align:center;display:flex;flex-direction:column;
-    align-items:center;gap:clamp(0px,.3vh,5px);min-width:0}
-  .hc-title{font-size:clamp(23px,5.4vh,60px);font-weight:900;color:#1E3A52;
-    letter-spacing:-.05em;line-height:1.05;white-space:nowrap}
-  .hc-sub{font-size:clamp(11px,2.05vh,23px);font-weight:900;color:#2F7A4E;
+    align-items:center;gap:clamp(0px,.3vh,5px);min-width:0;padding-top:clamp(1px,.4vh,6px)}
+  .hc-title{font-size:clamp(24px,6.0vh,70px);font-weight:900;color:#1E3A52;
+    letter-spacing:-.05em;line-height:1.04;white-space:nowrap}
+  .hc-sub{font-size:clamp(11px,2.15vh,26px);font-weight:900;color:#2F7A4E;
     letter-spacing:-.025em;white-space:nowrap;line-height:1.2}
 
-  .hc-scene{position:relative;z-index:2;min-height:0;display:flex;align-items:flex-end;
-    justify-content:center;gap:clamp(0px,.9vw,20px);padding-bottom:clamp(12px,3.2vh,34px)}
-  .hc-boy{flex:none;height:clamp(96px,29.5vh,330px);display:flex;align-items:flex-end}
+  .hc-scene{position:relative;z-index:2;height:100%;min-height:0;display:flex;align-items:flex-end;
+    justify-content:center;gap:clamp(0px,1vw,22px);padding-bottom:clamp(10px,2.6vh,30px)}
+  .hc-boy{flex:none;height:100%;display:flex;align-items:flex-end}
   .hc-boy img{height:100%;width:auto;display:block;-webkit-user-drag:none;user-select:none;
     filter:drop-shadow(0 clamp(2px,.5vh,5px) 0 rgba(35,63,90,.15))}
-  .hc-pok{flex:none;display:flex;align-items:flex-end;transform-origin:50% 100%}
+  .hc-pok{flex:none;height:100%;display:flex;align-items:flex-end;transform-origin:50% 100%}
   .hc-pok img{width:auto;display:block;-webkit-user-drag:none;user-select:none;
     filter:drop-shadow(0 clamp(1px,.35vh,3px) 0 rgba(35,63,90,.16))}
-  .hc-pok.p1 img{height:clamp(42px,10.4vh,116px)}
-  .hc-pok.p2 img{height:clamp(32px,8.2vh,92px)}
-  .hc-pok.p3 img{height:clamp(46px,11.6vh,128px)}
-  .hc-pok.p4 img{height:clamp(36px,9.2vh,102px)}
-  .hc-pok.p5 img{height:clamp(38px,9.8vh,108px)}
-  .hc-pok.p2{transform:rotate(-9deg) translateY(-7%)}
-  .hc-pok.p4{transform:rotate(7deg)}
-  .hc-jig{position:absolute;right:clamp(8px,2.2vw,42px);top:clamp(4px,1.4vh,20px);z-index:2;
-    animation:jigbob 3.6s ease-in-out infinite}
-  .hc-jig img{height:clamp(30px,7.4vh,84px);width:auto;display:block;-webkit-user-drag:none;user-select:none;
-    filter:drop-shadow(0 2px 0 rgba(35,63,90,.14))}
-  @keyframes jigbob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-7%) rotate(4deg)}}
+  .hc-pok.p1 img{height:46%}
+  .hc-pok.p2 img{height:34%}
+  .hc-pok.p3 img{height:52%}
+  .hc-pok.p4 img{height:40%}
+  .hc-pok.p5 img{height:43%}
+  .hc-pok.p6 img{height:38%}
+  .hc-pok.p2{transform:rotate(-9deg) translateY(-2%)}
+  .hc-pok.p4{transform:rotate(6deg)}
+  .hc-pok.p6{transform:rotate(-5deg)}
 
   .rest-affirm{flex:none;display:flex;align-items:center;gap:clamp(6px,.9vw,13px);min-width:0;
     background:linear-gradient(180deg,#FFFDF0,#FFF8DC);border:2px solid #F0D98C;border-radius:999px;
@@ -474,12 +471,11 @@
   .rest-affirm .afstar{font-size:clamp(13px,2.1vh,24px)}
   .rest-affirm .aflab{font-size:clamp(9px,1.55vh,16px)}
   .rest-affirm .raftext{flex:1 1 auto;min-width:0;text-align:center;
-    font-size:clamp(13px,2.45vh,29px);font-weight:900;color:#5E4C1C;letter-spacing:-.025em;
+    font-size:clamp(13px,2.7vh,32px);font-weight:900;color:#5E4C1C;letter-spacing:-.025em;
     line-height:1.24;word-break:keep-all}
 
   @media (max-height:700px){
     .rest-hint{display:none}
-    .hc-jig{display:none}
   }
   @media (orientation:portrait){
     .hc-scene{gap:2px;padding-bottom:10px}
@@ -709,7 +705,6 @@
         <div class="hc-sub" id="restSub">오늘은 푹 쉬고 신나게 놀자!</div>
       </div>
       <div class="hc-scene" id="restScene"></div>
-      <div class="hc-jig" id="restJig" aria-hidden="true"></div>
     </div>
     <div class="rest-affirm">
       <span class="afstar">⭐</span>
@@ -1577,7 +1572,7 @@ function stampSVG(kind, mon) {
     night: $('night'), nightTime: $('nightTime'), nightDate: $('nightDate'),
     toast: $('toast'), world: $('world'), bigBall: $('bigBall'), brandBall: $('brandBall'), clouds: $('clouds'),
     restPanel: $('restPanel'), restBadge: $('restBadge'), restHint: $('restHint'), restSub: $('restSub'),
-    restScene: $('restScene'), restJig: $('restJig'), restAffirm: $('restAffirmText'),
+    restScene: $('restScene'), restAffirm: $('restAffirmText'),
     restToggle: $('restToggle'), restTxt: $('restTxt')
   };
 
@@ -2120,10 +2115,9 @@ function stampSVG(kind, mon) {
   }
   function buildRestScene() {
     if (!el.restScene) return;
-    el.restScene.innerHTML = pok('bulbasaur', 'p1') + pok('squirtle', 'p2') +
+    el.restScene.innerHTML = pok('bulbasaur', 'p1') + pok('charmander', 'p5') + pok('squirtle', 'p2') +
       '<div class="hc-boy"><img src="' + IMG_ART.clothes + '" alt="' + esc(kidNameText()) + '" draggable="false" /></div>' +
-      pok('pikachu', 'p3') + pok('eevee', 'p4') + pok('charmander', 'p5');
-    if (el.restJig) el.restJig.innerHTML = '<img src="' + monURI('jigglypuff') + '" alt="" draggable="false" />';
+      pok('pikachu', 'p3') + pok('eevee', 'p4') + pok('jigglypuff', 'p6');
   }
   function renderRest(d) {
     var info = restInfo(d), aff = el.affirm.textContent;
