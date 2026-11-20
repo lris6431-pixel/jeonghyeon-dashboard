@@ -2439,7 +2439,7 @@ function stampSVG(kind, mon) {
     var wasDone = !!c[id];
     if (wasDone) delete c[id]; else c[id] = true;
     saveState();
-    dexSyncToday();
+    dexSyncToday(true);
     renderDeck(true);
     renderProgress(new Date());
     if (!wasDone) {
@@ -2793,7 +2793,7 @@ function stampSVG(kind, mon) {
     state.supChecks = {};
     masterShownFor = '';
     saveState();
-    dexSyncToday();
+    dexSyncToday(true);
     lastDeckSig = ''; renderDeck(true); renderProgress(new Date()); renderSupplies();
     showToast('체크를 모두 지웠어요');
   });
@@ -2848,15 +2848,16 @@ function stampSVG(kind, mon) {
     for (var j = 0; j < et.length; j++) if (ec[et[j].id]) { ed++; p[et[j].mon] = (p[et[j].mon] || 0) + 1; }
     return { m: (mt.length && md === mt.length) ? 1 : 0, e: (et.length && ed === et.length) ? 1 : 0, p: p };
   }
-  function dexApply(key) {
+  function dexApply(key, prune) {
     if (!key || !dexDayOK(key)) return;
     var s = dexSnap(), any = false;
     for (var mk in s.p) { any = true; break; }
     if (s.m || s.e || any) dex.days[key] = { m: s.m, e: s.e, p: s.p };
-    else if (dex.days[key]) delete dex.days[key];
+    else if (prune && dex.days[key]) delete dex.days[key];
     saveDex();
   }
-  function dexSyncToday() { dexApply(state.dayKey || currentKey()); }
+  /* prune=true 는 지금 체크를 그대로 반영(아이템 해제 등) — 로드/롤오버에서는 절대 지우지 않는다 */
+  function dexSyncToday(prune) { dexApply(state.dayKey || currentKey(), prune); }
 
   /* 주말·공휴일 + 부모가 '쉬는 날'로 돌린 날 */
   function dexRestDay(d) {
@@ -2952,7 +2953,7 @@ function stampSVG(kind, mon) {
   }
 
   function openDex() {
-    dexSyncToday();
+    dexSyncToday(false);
     dexMonth = dexMonthNow();
     renderDex();
     var dmod = $('dexModal');
