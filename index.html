@@ -560,6 +560,7 @@
   .btn.primary{background:#4CAF50;color:#fff;box-shadow:0 3px 0 #3C9240}
   .btn.warn{background:#FFF0F2;color:#C2506A}
   .btn.on{background:#4CAF50;color:#fff;box-shadow:0 3px 0 #3C9240}
+  .btn:disabled{opacity:.55;cursor:default;box-shadow:none}
 
   @media (max-height:660px){
     :root{--pad:6px;--gap:5px}
@@ -2147,11 +2148,13 @@ function stampSVG(kind, mon) {
     if (!el.restToggle) return;
     var d = new Date(), today = dateKey(d);
     var on = !!state.restForce && state.restForce === today;
-    el.restToggle.textContent = on ? '🎈 쉬는 날 모드 켜짐 · 끄기' : '🎈 오늘 쉬는 날 모드로 보기';
+    var auto = isWeekendRest(d) || !!holidayName(d);
+    if (auto && !on) el.restToggle.textContent = '🎈 오늘은 자동으로 쉬는 날';
+    else el.restToggle.textContent = on ? '🎈 쉬는 날 모드 켜짐 · 끄기' : '🎈 오늘 쉬는 날 모드로 보기';
+    el.restToggle.disabled = (auto && !on);
     el.restToggle.classList.toggle('on', on);
     if (el.restTxt) {
-      el.restTxt.textContent = on ? '켜짐 (오늘 하루)' :
-        ((isWeekendRest(d) || !!holidayName(d)) ? '자동 · 오늘은 쉬는 날' : '자동 · 오늘은 평일');
+      el.restTxt.textContent = on ? '켜짐 (오늘 하루)' : (auto ? '자동 · 오늘은 쉬는 날' : '자동 · 오늘은 평일');
     }
   }
 
