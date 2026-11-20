@@ -408,9 +408,9 @@
 
   /* ============ 쉬는 날 화면 (주말·공휴일) ============ */
   .rest{display:none}
-  body.rest .screen{grid-template-rows:auto minmax(0,1fr)}
-  body.rest #progressCard,body.rest .affirm,body.rest #deck,body.rest .supplies{display:none}
-  body.rest .rest{display:flex;flex-direction:column;gap:clamp(6px,1.05vh,14px);min-height:0;min-width:0}
+  body.is-rest .screen{grid-template-rows:auto minmax(0,1fr)}
+  body.is-rest #progressCard,body.is-rest .affirm,body.is-rest #deck,body.is-rest .supplies{display:none}
+  body.is-rest .rest{display:flex;flex-direction:column;gap:clamp(6px,1.05vh,14px);min-height:0;min-width:0}
 
   .rest-head{flex:none;display:flex;align-items:center;justify-content:center;
     gap:clamp(5px,.8vw,14px);min-width:0}
@@ -2140,7 +2140,7 @@ function stampSVG(kind, mon) {
     var want = isRestDay(now);
     if (want !== restOn) {
       restOn = want;
-      document.body.classList.toggle('rest', want);
+      document.body.classList.toggle('is-rest', want);
       if (el.restPanel) el.restPanel.setAttribute('aria-hidden', want ? 'false' : 'true');
     }
     if (want) renderRest(now);
