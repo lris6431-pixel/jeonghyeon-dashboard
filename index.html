@@ -406,6 +406,15 @@
   .chip.must{background:#FFF9E6;border-color:#F0DE9C;color:#7A6316}
   .chip.must.on{background:#FFF3C9;border-color:#E6C558}
   .chip.must .ck{border-color:#D9C177}
+  /* 그날의 행사(유치원 계획안) 칩 — 체크 대상이 아닌 안내용 */
+  .chip.ev{grid-column:span 4;cursor:default;justify-content:flex-start;
+    min-height:clamp(22px,3.1vh,29px);padding-top:clamp(0px,.1vh,2px);padding-bottom:clamp(0px,.1vh,2px);
+    border:2px solid #F0CE74;background:linear-gradient(180deg,#FFF8DF,#FFEFBE);color:#75570A;
+    font-size:clamp(10px,1.85vh,18px);letter-spacing:-.03em;gap:.3em}
+  .chip.ev.w1{grid-column:span 12;justify-content:center;min-height:clamp(28px,4.0vh,38px);
+    font-size:clamp(12px,2.1vh,21px);letter-spacing:-.02em}
+  .chip.ev.w2{grid-column:span 6;justify-content:center}
+  .chip.ev:active{transform:none}
   .divider{display:none}
   .tkd{display:flex;align-items:center;justify-content:center;gap:clamp(5px,.7vw,12px);min-width:0;min-height:0;
     background:linear-gradient(180deg,#FFF8F3 0%,#FFE7DA 100%);
@@ -1660,6 +1669,40 @@ function stampSVG(kind, mon) {
     '0': ['주말 나들이 물통', '여벌옷']
   };
   var DEFAULT_COMMON = ['필통', '여유 마스크', '물통', '개인 수건'];
+
+  /* ================= 날짜별 유치원 준비물·행사 ================= */
+  /* 덕암유치원 넓은 우주반 주간교육계획안을 날짜별로 옮긴다.
+     그 날짜가 오면 위의 요일 기본값(kind·common)보다 이 내용이 먼저 쓰인다.
+     기기에 저장된 설정·예전 기본값과 상관없이 적용되므로, 계획안이 바뀌면
+     여기만 고치면 된다. bring = 복장·준비물, common = 매일 챙기는 것,
+     events = 그날의 특색·특별활동(체크하지 않는 안내 칩). */
+  var SUPPLIES = {
+    '2026-11-23': {
+      bring: ['자유복', '알림장', '앞치마·팔토시 제출'],
+      common: ['필통', '물통', '마스크', '개인 수건'],
+      events: ['🛡️ 안전교육', '📦 Kinderbox', '🗣️ 잉글리쉬빌리지']
+    },
+    '2026-11-24': {
+      bring: ['체육복', '운동화'],
+      common: ['필통', '물통', '마스크', '개인 수건'],
+      events: ['🎂 생일파티']
+    },
+    '2026-11-25': {
+      bring: ['자유복', '알림장'],
+      common: ['필통', '물통', '마스크', '개인 수건'],
+      events: ['🚜 농촌체험(강정·배추)']
+    },
+    '2026-11-26': {
+      bring: ['체육복', '운동화', '받아쓰기 19급'],
+      common: ['필통', '물통', '마스크', '개인 수건'],
+      events: []
+    },
+    '2026-11-27': {
+      bring: ['자유복', '앞치마·팔토시'],
+      common: ['필통', '물통', '마스크', '개인 수건'],
+      events: ['🥬 김장체험']
+    }
+  };
   var TKD_NOV = {
     '2026-11-02': '인성 교육 · 미트차기 타바타 / 수준별 기본동작',
     '2026-11-03': '레벨 줄넘기 / 단체 품새',
@@ -2271,10 +2314,24 @@ function stampSVG(kind, mon) {
   }
 
   /* ================= 준비물 + 태권도 ================= */
+  function datedSupply() {
+    var s = SUPPLIES[dateKey(new Date())];
+    return (s && s.bring && s.bring.length) ? s : null;
+  }
+  function todayEvents() {
+    var s = datedSupply();
+    return (s && s.events) ? s.events.slice() : [];
+  }
   function todayItems() {
+    var ds = datedSupply(), out = [];
+    if (ds) {
+      ds.bring.forEach(function (t) { if (t) out.push({ text: t, must: false }); });
+      (ds.common || []).forEach(function (t) { if (t) out.push({ text: t, must: true }); });
+      return out;
+    }
     var wd = String(new Date().getDay());
     var list = (state.kind[wd] || []).slice();
-    var out = list.map(function (t) { return { text: t, must: false }; });
+    out = list.map(function (t) { return { text: t, must: false }; });
     (state.common || []).forEach(function (t) { if (t) out.push({ text: t, must: true }); });
     return out;
   }
@@ -2294,14 +2351,18 @@ function stampSVG(kind, mon) {
     }
   }
   function renderSupplies() {
-    var items = todayItems(), html = '', done = 0;
+    var items = todayItems(), evs = todayEvents(), html = '', done = 0;
+    var evCls = evs.length === 1 ? ' w1' : (evs.length === 2 ? ' w2' : '');
+    for (var j = 0; j < evs.length; j++) {
+      html += '<span class="chip ev' + evCls + '">' + esc(evs[j]) + '</span>';
+    }
     for (var i = 0; i < items.length; i++) {
       var it = items[i], on = !!state.supChecks[it.text];
       if (on) done++;
       html += '<button class="chip' + (on ? ' on' : '') + (it.must ? ' must' : '') + '" type="button" data-sup="' + esc(it.text) + '"' +
         ' aria-pressed="' + (on ? 'true' : 'false') + '"><span class="ck">✓</span>' + esc(it.text) + '</button>';
     }
-    if (!items.length) html = '<span class="chip" style="cursor:default">오늘은 준비물이 없어요</span>';
+    if (!items.length && !evs.length) html = '<span class="chip" style="cursor:default">오늘은 준비물이 없어요</span>';
     el.chips.innerHTML = html;
     el.chips.setAttribute('data-rem', items.length ? String(items.length % 4) : 'empty');
     fitChips();
@@ -2609,6 +2670,7 @@ function stampSVG(kind, mon) {
     });
 
     html += '<div class="grp"><h3>🎒 요일별 유치원 준비물 <span style="font-weight:700;color:#7D9DB0;font-size:.8em">(쉼표로 구분)</span></h3>';
+    if (datedSupply()) html += '<div style="font-size:clamp(10px,1.5vh,13px);color:#8A6410;font-weight:800;padding:0 0 5px">오늘은 주간계획안의 날짜별 준비물이 먼저 보여요. 아래 요일 설정은 그 날짜가 지나면 다시 쓰여요.</div>';
     for (var d = 1; d <= 6; d++) html += supRow(String(d), WD[d]);
     html += supRow('0', WD[0]);
     html += '<div class="suprow"><span class="dow">매일</span><input class="textin" type="text" data-common="1" value="' + esc(state.common.join(', ')) + '" /></div>';
