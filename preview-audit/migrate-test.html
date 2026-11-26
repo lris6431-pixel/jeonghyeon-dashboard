@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>코에픽 저장 상태 이전 검사</title>
+<style>
+ body{margin:0;background:#eef3f7;font:13px/1.5 -apple-system,'Apple SD Gothic Neo',sans-serif;color:#123}
+ h1{font-size:15px;margin:10px 12px 4px}
+ pre{white-space:pre-wrap;margin:8px 12px 30px;background:#fff;border:1px solid #cbd8e2;border-radius:8px;padding:10px;font-size:12px}
+</style>
+</head>
+<body>
+<h1>기존 기기 저장 상태(규칙 v2) → 코에픽 자동 추가 검사</h1>
+<pre id="out">검사 중…</pre>
+<script>
+function pad(n){return (n<10?'0':'')+n;}
+function logicalKey(){var d=new Date(Date.now()-7*3600000);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+var today = logicalKey();
+
+/* 11-22 시점의 실제 저장 형태(아침 5칸 / 하원 7칸, 규칙 v2)를 흉내 낸다 */
+var OLD = {
+  morning: [
+    {id:'m1',text:'아침 먹기',art:'meal',mon:'bulbasaur'},
+    {id:'m2',text:'세수·양치',art:'brush',mon:'squirtle'},
+    {id:'m3',text:'옷 입기',art:'clothes',mon:'charmander'},
+    {id:'m4',text:'가방 챙기기',art:'bag',mon:'eevee'},
+    {id:'m5',text:'유산균 먹기',art:'probio',mon:'jigglypuff'}
+  ],
+  evening: [
+    {id:'e6',text:'손발 씻기',art:'wash_hands',mon:'squirtle'},
+    {id:'e7',text:'가방 정리',art:'pack_bag',mon:'pikachu'},
+    {id:'e1',text:'저녁 먹기',art:'dinner',mon:'charmander'},
+    {id:'e2',text:'엘리하이',art:'study',mon:'squirtle'},
+    {id:'e3',text:'받아쓰기·숙제',art:'write',mon:'eevee'},
+    {id:'e4',text:'비타민 먹기',art:'vitamin',mon:'jigglypuff'},
+    {id:'e5',text:'샤워하기',art:'shower',mon:'bulbasaur'}
+  ],
+  checks: { morning: {m1:true, m2:true}, evening: {e6:true, e1:true} },
+  kind: {'1':['자유복','알림장'],'2':['체육복','운동화']},
+  common: ['필통','여유 마스크','물통','개인 수건'],
+  supChecks: {'체육복':true},
+  tkd: {'2026-11-26':'태권도 승급 심사'},
+  times: {start:'08:00', depart:'09:00', bed:'21:00'},
+  kidName: '정현', dayKey: today, restForce: '', rulesVer: 2
+};
+var OLD_DEX = {v:1, days:{'2026-11-25':{m:1,e:0,p:{bulbasaur:2,squirtle:3,jigglypuff:1}}, '2026-11-24':{m:0,e:1,p:{pikachu:1}}}, rest:{}};
+
+var lines = [], fails = 0;
+function log(s){ lines.push(s); }
+function check(name, cond, extra){ if(!cond){ fails++; log('  ✗ ' + name + (extra ? ' — ' + extra : '')); } else { log('  ✓ ' + name + (extra ? ' — ' + extra : '')); } }
+
+function runCase(title, oldState, cb){
+  localStorage.clear();
+  localStorage.setItem('pokemonDash.v2', JSON.stringify(oldState));
+  localStorage.setItem('jh_dex_v1', JSON.stringify(OLD_DEX));
+  log('\n### ' + title);
+  var f = document.createElement('iframe');
+  f.width = 1280; f.height = 800; f.style.visibility = 'hidden';
+  f.src = 'index.html?mig=' + Math.random();
+  document.body.appendChild(f);
+  f.onload = function(){
+    setTimeout(function(){
+      var saved = null;
+      try { saved = JSON.parse(localStorage.getItem('pokemonDash.v2')); } catch(e){}
+      var dexRaw = localStorage.getItem('jh_dex_v1');
+      var deck = [];
+      try {
+        deck = [].slice.call(f.contentDocument.querySelectorAll('#deck .task .lb')).map(function(x){return x.textContent;});
+      } catch(e){}
+      cb(saved, dexRaw, deck, f);
+    }, 1200);
+  };
+}
+
+function summarize(saved){
+  return {
+    morning: saved.morning.map(function(t){return t.id + ':' + t.text;}),
+    evening: saved.evening.map(function(t){return t.id + ':' + t.text;}),
+    checks: saved.checks,
+    rulesVer: saved.rulesVer
+  };
+}
+
+function baseChecks(saved, deck, label){
+  log('  아침: ' + summarize(saved).morning.join(' / '));
+  log('  하원: ' + summarize(saved).evening.join(' / '));
+  log('  오늘 체크: ' + JSON.stringify(saved.checks));
+  check('아침 6칸', saved.morning.length === 6, saved.morning.length + '칸');
+  check('하원 8칸', saved.evening.length === 8, saved.evening.length + '칸');
+  check('아침 코에픽이 6번째', saved.morning[5] && saved.morning[5].id === 'm6' && /코에픽/.test(saved.morning[5].text));
+  check('하원 코에픽이 비타민 다음(7번째)', saved.evening[6] && saved.evening[6].id === 'e8' && /코에픽/.test(saved.evening[6].text));
+  check('규칙 버전 3', saved.rulesVer === 3, String(saved.rulesVer));
+  check('기존 오늘 체크 유지', !!saved.checks.morning.m1 && !!saved.checks.morning.m2 && !!saved.checks.evening.e6 && !!saved.checks.evening.e1 && Object.keys(saved.checks.morning).length === 2 && Object.keys(saved.checks.evening).length === 2);
+  check('새 항목은 미체크', !saved.checks.morning.m6 && !saved.checks.evening.e8);
+  check('화면에 코에픽 보임', deck.indexOf('코에픽 하기') >= 0, deck.join(' / '));
+}
+
+var queue = [];
+
+/* 사례 1: 11-22 기본 상태 그대로 */
+queue.push(function(next){
+  runCase('사례 1 — 기본 5칸/7칸 기기', OLD, function(saved, dexRaw, deck){
+    baseChecks(saved, deck);
+    var dex = JSON.parse(dexRaw || '{}');
+    check('도감 기록 보존(11-25)', !!(dex.days && dex.days['2026-11-25'] && dex.days['2026-11-25'].p && dex.days['2026-11-25'].p.squirtle === 3), dexRaw && dexRaw.slice(0, 120));
+    check('도감 기록 보존(11-24)', !!(dex.days && dex.days['2026-11-24'] && dex.days['2026-11-24'].e === 1));
+    check('준비물 체크 유지', !!saved.supChecks['체육복']);
+    next();
+  });
+});
+
+/* 사례 2: 이름을 바꾸거나 항목을 더 넣은 기기 */
+queue.push(function(next){
+  var custom = JSON.parse(JSON.stringify(OLD));
+  custom.morning[0].text = '아침밥 먹기';
+  custom.morning.push({id:'m9', text:'동화책 읽기', art:'study', mon:'eevee'});
+  custom.checks.morning.m9 = true;
+  custom.evening[6].text = '씻고 자기';
+  runCase('사례 2 — 이름 변경 + 항목 추가 기기', custom, function(saved, dexRaw, deck){
+    log('  아침: ' + summarize(saved).morning.join(' / '));
+    log('  하원: ' + summarize(saved).evening.join(' / '));
+    log('  오늘 체크: ' + JSON.stringify(saved.checks));
+    check('바꾼 이름 유지', saved.morning[0].text === '아침밥 먹기' && saved.evening[7] && saved.evening[7].text === '씻고 자기', saved.morning[0].text + ' / ' + (saved.evening[7]||{}).text);
+    check('직접 넣은 항목 유지와 자리', saved.morning.length === 7 && saved.morning[6].id === 'm9' && saved.morning[5].id === 'm6', saved.morning.map(function(t){return t.id;}).join(','));
+    check('추가 항목 체크 유지', !!saved.checks.morning.m9);
+    check('코에픽 추가됨', saved.morning.some(function(t){return t.id==='m6';}) && saved.evening.some(function(t){return t.id==='e8';}));
+    check('규칙 버전 3', saved.rulesVer === 3);
+    check('오늘 체크 유지(기본분)', !!saved.checks.morning.m1 && !!saved.checks.evening.e6);
+    next();
+  });
+});
+
+/* 사례 3: 이미 8칸인 하원 루틴 (레이아웃 보호) */
+queue.push(function(next){
+  var full = JSON.parse(JSON.stringify(OLD));
+  full.evening.push({id:'e9', text:'동화책 읽기', art:'study', mon:'eevee'});
+  runCase('사례 3 — 하원이 이미 8칸인 기기', full, function(saved, dexRaw, deck){
+    log('  하원: ' + summarize(saved).evening.join(' / '));
+    check('8칸 유지(넘치지 않음)', saved.evening.length === 8, saved.evening.length + '칸');
+    check('직접 넣은 항목 유지', saved.evening.some(function(t){return t.id==='e9';}));
+    check('아침에는 코에픽 추가', saved.morning.some(function(t){return t.id==='m6';}));
+    next();
+  });
+});
+
+/* 사례 4: 두 번 열어도 중복으로 늘지 않음 */
+queue.push(function(next){
+  runCase('사례 4 — 재접속(중복 방지)', OLD, function(saved, dexRaw, deck, f){
+    f.onload = function(){
+      setTimeout(function(){
+        var again = JSON.parse(localStorage.getItem('pokemonDash.v2'));
+        log('  재접속 후 아침: ' + again.morning.map(function(t){return t.id;}).join(','));
+        log('  재접속 후 하원: ' + again.evening.map(function(t){return t.id;}).join(','));
+        check('아침 6칸 그대로', again.morning.length === 6, again.morning.length + '칸');
+        check('하원 8칸 그대로', again.evening.length === 8, again.evening.length + '칸');
+        check('코에픽 중복 없음', again.morning.filter(function(t){return t.id==='m6';}).length === 1 && again.evening.filter(function(t){return t.id==='e8';}).length === 1);
+        next();
+      }, 1200);
+    };
+    f.contentWindow.location.reload();
+  });
+});
+
+function step(){
+  var fn = queue.shift();
+  if (!fn) {
+    document.getElementById('out').textContent = lines.join('\n') + '\n\n==== ' + (fails ? 'FAIL ' + fails + '건' : '전체 PASS') + ' ====';
+    document.title = fails ? 'MIG FAIL' : 'MIG PASS';
+    window.__done = true;
+    return;
+  }
+  fn(function(){ setTimeout(step, 300); });
+}
+setTimeout(step, 300);
+</script>
+</body>
+</html>
